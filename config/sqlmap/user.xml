@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.haut.dao.UserDao">
+	<!-- type属性值：最终要映射的java对象类型，可使用别名
+		 id:对resultMap的唯一标示
+	 -->
+	<resultMap type="cn.edu.haut.entity.User" id="userResultMap">
+		<!-- column属性：查询出来的列名
+			 property：type对应的pojo类型中的属性名
+		 -->
+		<id column="id" property="id"/>
+		<result column="username" property="userName"/>
+		<result column="password" property="userPwd"/>
+	</resultMap>
+	
+	<insert id="add" parameterType="cn.edu.haut.entity.User">
+		insert into user(username,password) values (#{userName},#{userPwd})
+	</insert>
+	
+	<update id="update" parameterType="cn.edu.haut.entity.User">
+		update user set username=#{userName},password=#{userPwd} where id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		delete from user where id=#{id}
+	</delete>
+	
+	<select id="findAll" resultMap="userResultMap">
+		select * from user
+	</select>
+	
+	<select id="findUserLists" resultMap="userResultMap">
+		select * from user
+		<where>
+			<if test="userName!=null and userName!=''">
+				and username=#{userName}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findUser2" resultMap="userResultMap">
+		select * from user where 1=1
+		<if test="userName!=null and userName!=''">
+			and username=#{userName}
+		</if>
+		<if test="userPwd!=null and userPwd!=''">
+			and password=#{userPwd}
+		</if>
+	</select>
+	
+	<!-- 推荐使用where -->
+	<select id="findUser" parameterType="cn.edu.haut.entity.User" resultType="cn.edu.haut.entity.User">
+		select * from user where username=#{userName} and password=#{userPwd}
+		<!-- <where>
+			<if test="userName!=null and userName!=''">
+				and username=#{userName}
+			</if>
+			<if test="userPwd!=null and userPwd!=''">
+				and password=#{userPwd}
+			</if>
+		</where> -->
+	</select>
+	
+	
+	
+	<!-- <insert id="addUser" parameterType="cn.edu.haut.entity.User">
+		insert into user(username,password) values(#{userName},#{userPwd})
+	</insert> -->
+	
+	<!--注意这里的参数类型是parameterType而不是parameterMap，因为返回的是单个类型  -->
+	<!-- <select id="findUserByNameAndPwd"  parameterType="map"  resultType="User">
+		select u.name,u.password from user u where username=#{userName} and password=#{userPwd}
+	</select> -->
+	
+</mapper>

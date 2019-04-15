@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.haut.dao.ColumnsDao">
+
+	<resultMap type="cn.edu.haut.entity.ColumnsInfo" id="columnsinfoMap">
+		<id column="id" property="id"/>
+		<result column="column_name" property="columnName"/>
+	</resultMap>
+	
+	<select id="findColumns" parameterType="cn.edu.haut.entity.ColumnsInfo" resultMap="columnsinfoMap">
+		select * from columnsinfo
+		<where>
+			<if test="columnName!=null and columnName!=''">
+				and column_name=#{columnName}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findColumnsWithoutLimit" parameterType="cn.edu.haut.entity.ColumnsInfo" resultMap="columnsinfoMap">
+		select * from columnsinfo
+	</select>
+	
+	<insert id="add" parameterType="cn.edu.haut.entity.ColumnsInfo">
+		insert into columnsinfo(column_name) values (#{columnName})
+	</insert>
+	
+	<update id="update" parameterType="cn.edu.haut.entity.ColumnsInfo">
+		update columnsinfo set column_name=#{columnName} where id=#{id}
+	</update>
+	
+	<delete id="deleteColumn" parameterType="int">
+		delete from columnsinfo where id=#{id}
+	</delete>
+</mapper>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.haut.dao.NewsInfoDao">
+	<resultMap type="cn.edu.haut.entity.NewsInfo" id="NewsInfoResultMap">
+		<id column="id" property="id"/>
+		<result column="title" property="title"/>
+		<result column="content" property="content"/>
+		<result column="column_id" property="columnId"/>
+		<result column="createtime" property="createTime"/>
+		<result column="create_userid" property="createUserId"/>
+		<result column="type" property="type"/>
+		<result column="set_top_time" property="setTopTime"/>
+		<result column="column_name" property="columnName"/>
+	</resultMap>
+	
+	<!-- 一对一关联查询 -->
+	<!-- association的resultMap -->
+	<resultMap type="cn.edu.haut.entity.NewsInfo" id="newsInfoAssociation">
+		<id column="id" property="id"/>
+		<result column="title" property="title"/>
+		<result column="content" property="content"/>
+		<result column="column_id" property="columnId"/>
+		<result column="createtime" property="createTime"/>
+		<result column="create_userid" property="createUserId"/>
+		<result column="type" property="type"/>
+		<result column="set_top_time" property="setTopTime"/>
+		<!--1. 可以直接映射数据表和实体类属性的对应关系
+			association：用于映射关联查询单个对象的信息
+			property：要将关联查询的用户信息映射到resultMap type属性中的哪个属性
+			javaType：映射的property属性的类型 
+			===========================================
+			association标签
+			id：关联查询用户的唯一标识
+			column：查询出的列名
+			property：对应实体类的属性
+		 -->
+		<association property="user" javaType="cn.edu.haut.entity.User">
+			 <id column="uid" property="id"/>
+			 <result column="username" property="userName"/>
+			 <result column="password" property="userPwd"/>
+		</association>
+		<!--2.也可以使用其他mapper.xml中定义过的resultMap
+			此处就可以省略再次映射数据表字段和实体类属性的对应关系
+		 -->
+		<!-- <association property="user" resultMap="user.userResultMap"></association> -->
+	</resultMap>
+	
+	<!-- 多表查询resultMap -->
+	<resultMap type="cn.edu.haut.entity.NewsInfo" id="newsResultMap3">
+		<id column="id" property="id"/>
+		<result column="title" property="title"/>
+		<result column="content" property="content"/>
+		<result column="column_id" property="columnId"/>
+		<result column="createtime" property="createTime"/>
+		<result column="create_userid" property="createUserId"/>
+		<result column="type" property="type"/>
+		<result column="set_top_time" property="setTopTime"/>
+		<result column="column_name" property="columnName"/>
+		<association property="user" javaType="cn.edu.haut.entity.User">
+			 <id column="uid" property="id"/>
+			 <result column="username" property="userName"/>
+			 <result column="password" property="userPwd"/>
+		</association>
+	</resultMap>
+	
+	<select id="findNews" resultMap="NewsInfoResultMap">
+		select n.*,c.column_name 
+		from newsinfo n,columnsinfo c 
+		WHERE n.column_id=c.id
+	</select>
+	<!-- 一对一association的使用 -->
+	<select id="findNews2" resultMap="newsInfoAssociation">
+		select n.*,u.id uid,u.username,u.password 
+		from 
+		newsinfo n,user u 
+		where 
+		n.create_userid=u.id
+	</select>
+	
+	<!-- 多表查询 -->
+	<select id="findNews3" resultMap="newsResultMap3">
+		select n.*,u.id as uid,u.username,u.`password`,c.column_name 
+		from 
+		newsinfo n,columnsinfo c,`user` u 
+		where 
+		n.column_id=c.id and u.id=n.create_userid
+	</select>
+	
+	<resultMap type="cn.edu.haut.entity.NewsInfo" id="newsInfoResultMap">
+		<id column="id" property="id"/>
+		<result column="title" property="title"/>
+		<result column="content" property="content"/>
+		<result column="column_id" property="columnId"/>
+		<result column="createtime" property="createTime"/>
+		<result column="create_userid" property="createUserId"/>
+		<result column="type" property="type"/>
+		<result column="set_top_time" property="setTopTime"/>
+		<result column="column_name" property="columnName"/>
+		<result column="keyword" property="keyWord"/>
+		<association property="columnsInfo" resultMap="cn.edu.haut.dao.ColumnsDao.columnsinfoMap">
+		</association>
+	</resultMap>
+	
+	<select id="find" parameterType="cn.edu.haut.entity.NewsInfo" resultMap="newsInfoResultMap">
+		select n.*, c.id as cid,c.column_name 
+		from newsinfo n,columnsinfo c 
+		where n.column_id=c.id 
+		<if test="columnId>0">
+			and n.column_id=#{columnId}
+		</if>
+		<if test="keyWord!=null and keyWord!=''">
+			and n.keyword=#{keyWord}
+		</if>
+		order by n.type desc,n.set_top_time desc
+	</select>
+	
+	<update id="updateTopState" parameterType="cn.edu.haut.entity.NewsInfo">
+		update newsinfo set type=#{type}
+		<if test="tag!=null and tag!='' and tag==1">
+			,set_top_time=#{setTopTime}
+		</if>
+		where id=#{id}
+	</update>
+	
+	<insert id="add" parameterType="cn.edu.haut.entity.NewsInfo">
+		insert into newsinfo(title,content,column_id,createtime,create_userid,type,set_top_time,keyword)
+		values(#{title},#{content},#{columnId},#{createTime},#{createUserId},#{type},#{setTopTime},#{keyWord})
+	</insert>
+</mapper>
